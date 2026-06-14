@@ -9,8 +9,8 @@ import {
 } from '../utils/function.js';
 import {
     userSignup,
-    checkEmail,
-    checkNickname,
+    //checkEmail,
+    //checkNickname,
     fileUpload,
 } from '../api/signupRequest.js';
 
@@ -103,13 +103,15 @@ const inputEventHandler = async (event, uid) => {
             helperElement.textContent =
                 '*올바른 이메일 주소 형식을 입력해주세요. (예: example@example.com)';
         } else {
-            const { status } = await checkEmail(value);
+            /*const { status } = await checkEmail(value);
             if (status === HTTP_OK) {
                 helperElement.textContent = '';
                 isComplete = true;
             } else {
                 helperElement.textContent = '*중복된 이메일 입니다.';
-            }
+            }*/
+            helperElement.textContent = '';
+            isComplete = true;
         }
         if (isComplete) {
             signupData.email = value;
@@ -174,14 +176,16 @@ const inputEventHandler = async (event, uid) => {
             helperElement.textContent =
                 '*닉네임에 특수 문자는 사용할 수 없습니다.';
         } else {
-            const { status } = await checkNickname(value);
+            /*const { status } = await checkNickname(value);
 
             if (status === HTTP_OK) {
                 helperElement.textContent = '';
                 isComplete = true;
             } else {
                 helperElement.textContent = '*중복된 닉네임 입니다.';
-            }
+            }*/
+            helperElement.textContent = '';
+            isComplete = true;
         }
 
         if (isComplete) {
@@ -241,7 +245,7 @@ const uploadProfileImage = () => {
             }
 
             const formData = new FormData();
-            formData.append('profileImage', file);
+            formData.append('file', file);
 
             // 파일 업로드를 위한 POST 요청 실행
             try {
@@ -249,7 +253,7 @@ const uploadProfileImage = () => {
                 if (!ok) throw new Error('서버 응답 오류');
                 localStorage.setItem(
                     'profileImageUrl',
-                    data.profileImageUrl,
+                    data.webpUrl || data.jpgUrl,
                 );
             } catch (error) {
                 console.error('업로드 중 오류 발생:', error);
@@ -258,7 +262,7 @@ const uploadProfileImage = () => {
 };
 
 const init = async () => {
-    await authCheckReverse();
+    await //authCheckReverse();
     prependChild(document.body, Header('커뮤니티', 1));
     observeSignupData();
     addEventForInputElements();

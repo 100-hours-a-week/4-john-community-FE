@@ -1,4 +1,3 @@
-import { checkNickname } from '../api/signupRequest.js';
 import Dialog from '../component/dialog/dialog.js';
 import Header from '../component/header/header.js';
 import {
@@ -31,7 +30,6 @@ const changeData = {
 
 const DEFAULT_PROFILE_IMAGE = '../public/image/profile/default.jpg';
 const HTTP_OK = 200;
-const HTTP_CREATED = 201;
 
 const setData = data => {
     if (
@@ -92,20 +90,14 @@ const changeEventHandler = async (event, uid) => {
             helperElement.textContent =
                 '*닉네임은 2~10자의 영문자, 한글 또는 숫자만 사용할 수 있습니다. 특수 문자와 띄어쓰기는 사용할 수 없습니다.';
         } else {
-            const { status } = await checkNickname(value);
-            if (status === HTTP_OK) {
-                helperElement.textContent = '';
-                isComplete = true;
-            } else if (authData.data.nickname === value) {
+            if (authData.data.nickname === value) {
                 helperElement.textContent = '';
                 button.disabled = true;
                 button.style.backgroundColor = '#ACA0EB';
                 return;
             } else {
-                helperElement.textContent = '*중복된 닉네임 입니다.';
-                button.disabled = true;
-                button.style.backgroundColor = '#ACA0EB';
-                return;
+                helperElement.textContent = '';
+                isComplete = true;
             }
         }
         if (isComplete) {
@@ -124,26 +116,28 @@ const changeEventHandler = async (event, uid) => {
             if (removeProfileButton) removeProfileButton.style.display = 'none';
         } else {
             const formData = new FormData();
-            formData.append('profileImage', file);
+            formData.append('file', file);
 
             // 파일 업로드를 위한 POST 요청 실행
             try {
                 const { ok, data } = await requestJson(
-                    `${getServerUrl()}/v1/users/upload/profile-image`,
+                    `${getServerUrl()}/images`,
                     {
                         method: 'POST',
                         body: formData,
+                        credentials: 'include',
                     },
                 );
 
                 if (!ok) throw new Error('서버 응답 오류');
+                const profileImageUrl = data.webpUrl || data.jpgUrl;
                 localStorage.setItem(
                     'profileImageUrl',
-                    data.profileImageUrl,
+                    profileImageUrl,
                 );
-                changeData.profileImageUrl = data.profileImageUrl;
+                changeData.profileImageUrl = profileImageUrl;
                 profilePreview.src = resolveImageUrl(
-                    data.profileImageUrl,
+                    profileImageUrl,
                     DEFAULT_PROFILE_IMAGE,
                 );
                 if (removeProfileButton)
@@ -165,7 +159,7 @@ const sendModifyData = async () => {
         } else {
             const { status } = await userModify(changeData);
 
-            if (status === HTTP_CREATED) {
+            if (status === HTTP_OK) {
                 localStorage.removeItem('profileImageUrl');
                 saveToastMessage('수정완료');
                 location.href = '/html/modifyInfo.html';
@@ -185,8 +179,8 @@ const deleteAccount = async () => {
 
         if (status === HTTP_OK) {
             try {
-                await requestJson(`${getServerUrl()}/v1/auth/logout`, {
-                    method: 'POST',
+                await requestJson(`${getServerUrl()}/auth`, {
+                    method: 'DELETE',
                     credentials: 'include',
                 });
             } catch (error) {

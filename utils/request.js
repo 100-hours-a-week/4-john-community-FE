@@ -20,7 +20,7 @@ export const requestJson = async (url, options = {}) => {
         code: body && body.code ? body.code : null,
         data: body && Object.prototype.hasOwnProperty.call(body, 'data')
             ? body.data
-            : null,
+            : body,
         body,
     };
 };

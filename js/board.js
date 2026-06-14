@@ -55,28 +55,29 @@ const setBoardDetail = data => {
     const nicknameElement = document.querySelector('.nickname');
 
     titleElement.textContent = data.title;
-    const date = new Date(data.createdAt);
+    const date = new Date(data.createdTime);
     const formattedDate = `${date.getFullYear()}-${padTo2Digits(date.getMonth() + 1)}-${padTo2Digits(date.getDate())} ${padTo2Digits(date.getHours())}:${padTo2Digits(date.getMinutes())}:${padTo2Digits(date.getSeconds())}`;
     createdAtElement.textContent = formattedDate;
 
     imgElement.src = resolveImageUrl(
-        data.profileImage,
+        data.authorProfileImage,
         DEFAULT_PROFILE_IMAGE,
     );
 
-    nicknameElement.textContent = data.nickname;
+    nicknameElement.textContent = data.authorNickname;
+
 
     // 바디 정보
     const contentImgElement = document.querySelector('.contentImg');
-    const fileUrl = data.fileUrl || resolveImageUrl(data.filePath);
+    const fileUrl = resolveImageUrl(data.postImage);
     if (fileUrl) {
-        console.log(fileUrl);
+        contentImgElement.innerHTML = '';
         const img = document.createElement('img');
         img.src = fileUrl;
         contentImgElement.appendChild(img);
     }
     const contentElement = document.querySelector('.content');
-    contentElement.textContent = data.content;
+    contentElement.textContent = data.body;
 
     const likeButtonElement = document.querySelector('.likeButton');
     const likeCountElement = likeButtonElement.querySelector('h3');
@@ -93,7 +94,7 @@ const setBoardDetail = data => {
         try {
             if (!isLiked) {
                 const { ok, status, code, data: likeData } = await likePost(
-                    data.id,
+                    data.postId,
                 );
                 if (ok) {
                     isLiked = true;
@@ -113,7 +114,7 @@ const setBoardDetail = data => {
                 }
             } else {
                 const { ok, status, code, data: likeData } = await unlikePost(
-                    data.id,
+                    data.postId,
                 );
                 if (ok) {
                     isLiked = false;
@@ -141,11 +142,11 @@ const setBoardDetail = data => {
     viewCountElement.textContent = formatCount(data.viewCount);
 
     const commentCountElement = document.querySelector('.commentCount h3');
-    commentCountElement.textContent = data.commentCount.toLocaleString();
+    commentCountElement.textContent = (data.replyCount ?? 0).toLocaleString();
 };
 
 const setBoardModify = async (data, myInfo) => {
-    if (myInfo.idx === data.writerId) {
+    if (myInfo.id === data.authorId) {
         const modifyElement = document.querySelector('.hidden');
         modifyElement.classList.remove('hidden');
 
@@ -168,7 +169,7 @@ const setBoardModify = async (data, myInfo) => {
 
         const modifyBtnElement2 = document.querySelector('#modifyBtn');
         modifyBtnElement2.addEventListener('click', () => {
-            window.location.href = `/html/board-modify.html?postId=${data.id}`;
+            window.location.href = `/html/board-modify.html?postId=${data.postId}`;
         });
     }
 };
@@ -186,9 +187,9 @@ const setBoardComment = (data, myInfo) => {
         data.map(event => {
             const item = CommentItem(
                 event,
-                myInfo.userId,
-                event.postId,
-                event.id,
+                myInfo.id,
+                event.postId || getQueryString('id'),
+                event.replyId,
             );
             commentListElement.appendChild(item);
         });
@@ -260,7 +261,7 @@ const init = async () => {
 
         const pageData = await getBoardDetail(pageId);
 
-        if (parseInt(pageData.userId, 10) === parseInt(myInfo.userId, 10)) {
+        if (parseInt(pageData.authorId, 10) === parseInt(myInfo.id, 10)) {
             setBoardModify(pageData, myInfo);
         }
         setBoardDetail(pageData);

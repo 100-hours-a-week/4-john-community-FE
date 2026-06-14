@@ -6,7 +6,7 @@ import {
 } from '../utils/function.js';
 import { userLogin } from '../api/loginRequest.js';
 
-const HTTP_OK = 200;
+const HTTP_OK = 201;
 const MAX_PASSWORD_LENGTH = 8;
 
 const loginData = {
@@ -123,7 +123,7 @@ const lottieAnimation = type => {
 };
 
 const init = async () => {
-    await authCheckReverse();
+    await //authCheckReverse();
     observeSignupData();
     prependChild(document.body, Header('커뮤니티', 0));
     eventSet();

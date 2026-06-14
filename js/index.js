@@ -38,7 +38,7 @@ const getBoardItem = async (offsetValue = 0, limitValue = 5) => {
     if (!result.ok) {
         throw new Error('Failed to load post list.');
     }
-    return result.data;
+    return result.data.content;
 };
 
 const setBoardItem = boardData => {
@@ -47,13 +47,13 @@ const setBoardItem = boardData => {
         const itemsHtml = boardData
             .map(data =>
                 BoardItem(
-                    data.id,
-                    data.createdAt,
+                    data.postId,
+                    data.createdTime,
                     data.title,
                     data.viewCount,
-                    data.author ? data.author.profileImageUrl : null,
-                    data.author ? data.author.nickname : null,
-                    data.commentCount,
+                    data.authorProfileImage,
+                    data.authorNickname,
+                    data.replyCount,
                     data.likeCount,
                 ),
             )
