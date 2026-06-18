@@ -3,7 +3,7 @@ import { requestJson } from '../utils/request.js';
 
 export const userModify = async changeData => {
     const result = await requestJson(`${getServerUrl()}/users/me/info`, {
-        method: 'PUT',
+        method: 'PATCH',
         headers: {
             'Content-Type': 'application/json',
         },
