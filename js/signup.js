@@ -47,7 +47,7 @@ const sendSignupData = async () => {
         return;
     }
 
-    if (props.password !== props.passwordCheck) {
+    if (props.password !== passwordCheck) {
         Dialog('비밀번호 확인', '비밀번호가 일치하지 않습니다.');
         return;
     }
@@ -182,14 +182,14 @@ const inputEventHandler = async (event, uid) => {
             helperElement.textContent =
                 '*닉네임에 특수 문자는 사용할 수 없습니다.';
         } else {
-            /*const { status } = await checkNickname(value);
+            const { status } = await checkNickname(value);
 
             if (status === HTTP_OK) {
                 helperElement.textContent = '';
                 isComplete = true;
             } else {
                 helperElement.textContent = '*중복된 닉네임 입니다.';
-            }*/
+            }
             helperElement.textContent = '';
             isComplete = true;
         }
