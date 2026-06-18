@@ -12,7 +12,7 @@ export const userSignup = async data => {
     return result;
 };
 
-/*export const checkEmail = async email => {
+export const checkEmail = async email => {
     const result = await requestJson(
         `${getServerUrl()}/users/email/check?email=${email}`,
         {
@@ -36,7 +36,7 @@ export const checkNickname = async nickname => {
         },
     );
     return result;
-};*/
+};
 
 export const fileUpload = async file => {
     const result = await requestJson(

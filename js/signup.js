@@ -9,8 +9,8 @@ import {
 } from '../utils/function.js';
 import {
     userSignup,
-    //checkEmail,
-    //checkNickname,
+    checkEmail,
+    checkNickname,
     fileUpload,
 } from '../api/signupRequest.js';
 
@@ -21,6 +21,7 @@ const HTTP_CREATED = 201;
 const signupData = {
     email: '',
     password: '',
+    passwordCheck: '',
     nickname: '',
     profileImageUrl: undefined,
 };
@@ -43,6 +44,11 @@ const sendSignupData = async () => {
 
     if (props.password > MAX_PASSWORD_LENGTH) {
         Dialog('비밀번호', '비밀번호는 20자 이하로 입력해주세요.');
+        return;
+    }
+
+    if (props.password !== props.passwordCheck) {
+        Dialog('비밀번호 확인', '비밀번호가 일치하지 않습니다.');
         return;
     }
     // signupData를 서버로 전송
