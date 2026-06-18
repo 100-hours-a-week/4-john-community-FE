@@ -37,7 +37,7 @@ const getSignupData = () => {
 };
 
 const sendSignupData = async () => {
-    const { passwordCheck, ...props } = signupData;
+    const props = { ...signupData }; 
     if (localStorage.getItem('profileImageUrl')) {
         props.profileImageUrl = localStorage.getItem('profileImageUrl');
     }
@@ -47,7 +47,7 @@ const sendSignupData = async () => {
         return;
     }
 
-    if (props.password !== passwordCheck) {
+    if (props.password !== props.passwordCheck) {
         Dialog('비밀번호 확인', '비밀번호가 일치하지 않습니다.');
         return;
     }
