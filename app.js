@@ -29,6 +29,11 @@ app.get('/', (req, res) => {
     res.redirect('/html/index.html');
 });
 
+// Express 예시: 이 코드가 있어야 curl 헬스 체크를 통과합니다.
+app.get('/health', (req, res) => {
+  res.status(200).send('OK');
+});
+
 app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
 });
