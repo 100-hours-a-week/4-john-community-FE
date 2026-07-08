@@ -12,8 +12,8 @@ export const getServerUrl = () => {
 
     const host = window.location.hostname;
     return host.includes('localhost')
-        ? 'https://localhost:8080'
-        : `https://${host}`;
+        ? 'http://localhost:8080'
+        : `http://${host}`;
 };
 
 

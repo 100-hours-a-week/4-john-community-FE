@@ -7,7 +7,7 @@ import {
     resolveImageUrl,
     validNickname,
 } from '../utils/function.js';
-import { userModify, userDelete } from '../api/modifyInfoRequest.js';
+import { userModify, userDelete } from '../client-api/modifyInfoRequest.js';
 import { requestJson } from '../utils/request.js';
 
 const emailTextElement = document.querySelector('#id');

@@ -12,7 +12,7 @@ import {
     checkEmail,
     checkNickname,
     fileUpload,
-} from '../api/signupRequest.js';
+} from '../client-api/signupRequest.js';
 
 const MAX_PASSWORD_LENGTH = 20;
 const HTTP_OK = 200;
@@ -87,7 +87,9 @@ const changeEventHandler = async (event, uid) => {
         const helperElement = document.querySelector(
             `.inputBox p[name="${uid}"]`,
         );
-        helperElement.textContent = '';
+        if (helperElement) {
+            helperElement.textContent = '';
+        }
     }
     observeSignupData();
 };
@@ -182,16 +184,18 @@ const inputEventHandler = async (event, uid) => {
             helperElement.textContent =
                 '*닉네임에 특수 문자는 사용할 수 없습니다.';
         } else {
-            const { status } = await checkNickname(value);
+            try {
+                const { status } = await checkNickname(value);
 
-            if (status === HTTP_OK) {
-                helperElement.textContent = '';
-                isComplete = true;
-            } else {
-                helperElement.textContent = '*중복된 닉네임 입니다.';
+                if (status === HTTP_OK) {
+                    helperElement.textContent = '';
+                    isComplete = true;
+                } else {
+                    helperElement.textContent = '*닉네임 확인에 실패했습니다.';
+                }
+            } catch (error) {
+                helperElement.textContent = '*닉네임 확인 서버에 연결할 수 없습니다.';
             }
-            helperElement.textContent = '';
-            isComplete = true;
         }
 
         if (isComplete) {

@@ -15,7 +15,7 @@ import {
     getComments,
     likePost,
     unlikePost,
-} from '../api/boardRequest.js';
+} from '../client-api/boardRequest.js';
 
 const DEFAULT_PROFILE_IMAGE = '../public/image/profile/default.jpg';
 const MAX_COMMENT_LENGTH = 1000;
@@ -69,12 +69,32 @@ const setBoardDetail = data => {
 
     // 바디 정보
     const contentImgElement = document.querySelector('.contentImg');
-    const fileUrl = resolveImageUrl(data.postImage);
-    if (fileUrl) {
-        contentImgElement.innerHTML = '';
-        const img = document.createElement('img');
-        img.src = fileUrl;
-        contentImgElement.appendChild(img);
+    contentImgElement.innerHTML = ''; // 요소 초기화
+
+    // 💡 백엔드 DTO에서 설정한 필드명에 맞게 가져옵니다. (예: data.postImage 또는 data.postImages)
+    const images = data.postImages; 
+
+    if (images) {
+        // 1. 이미지가 여러 개(배열)인 경우
+        if (Array.isArray(images)) {
+            images.forEach(imgUrl => {
+                const img = document.createElement('img');
+                img.src = resolveImageUrl(imgUrl);
+                
+                // 이미지 간격을 위해 마진을 추가하거나, CSS 클래스를 추가할 수 있습니다.
+                img.style.display = 'block';
+                img.style.marginBottom = '10px'; 
+                img.style.maxWidth = '100%';
+                contentImgElement.appendChild(img);
+            });
+        } 
+        // 2. 이미지가 한 개(문자열)인 경우 (예외 처리)
+        else if (typeof images === 'string') {
+            const img = document.createElement('img');
+            img.src = resolveImageUrl(images);
+            img.style.maxWidth = '100%';
+            contentImgElement.appendChild(img);
+        }
     }
     const contentElement = document.querySelector('.content');
     contentElement.textContent = data.body;
