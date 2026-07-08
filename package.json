@@ -7,7 +7,8 @@
   "private": true,
   "scripts": {
     "start": "node app.js",
-    "dev": "nodemon app.js"
+    "dev": "nodemon app.js",
+    "test": "echo \"No tests written yet\" && exit 0"
   },
   "dependencies": {
     "cookie-parser": "^1.4.6",
