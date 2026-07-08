@@ -86,7 +86,7 @@ jobs:
               echo "FE Rollback completed."
               exit 1
             fi
-            echo "FE Health Check Passed!"
+            echo "FE Health Check Passed"
 
             # 오래된 FE 도커 이미지 정리 (최신 2개만 유지)
             FE_IMAGE="registry.john-personalproject.xyz/web-fe"
