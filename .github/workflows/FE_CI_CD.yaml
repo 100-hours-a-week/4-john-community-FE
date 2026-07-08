@@ -1,0 +1,93 @@
+name: Frontend CI/CD
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Run Tests
+        run: npm test
+
+  # 2. 빌드 및 도커 푸시 (테스트 통과 & Push 이벤트일 때만 실행)
+  build-and-push:
+    needs: test
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Log in to Private Docker Registry
+        uses: docker/login-action@v3
+        with:
+          registry: registry.john-personalproject.xyz
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - name: Build and Push FE Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: |
+            registry.john-personalproject.xyz/web-fe:1.${{ github.run_number }}
+
+  # 3. EC2 배포 (빌드/푸시 성공일때 발생)
+  deploy:
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy and Health Check
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          #가용영역이 2개이기 때문에 2개의 퍼블릭 ip
+          host: ${{ secrets.EC2_FE_PUBLIC_IP_1 }},${{ secrets.EC2_FE_PUBLIC_IP_2 }}
+          username: ${{ secrets.EC2_FE_USERNAME }}
+          key: ${{ secrets.EC2_FE_SSH_KEY }}
+          script: |
+            cd /home/${{ secrets.EC2_FE_USERNAME }}/web-stack
+            
+            # FE 태그 업데이트 (기존 버전을 OLD로, 새 버전을 NEW로)
+            CURRENT_TAG=$(grep "^FE_NEW_TAG=" .env | cut -d '=' -f2)
+            sed -i "s/^FE_OLD_TAG=.*/FE_OLD_TAG=$CURRENT_TAG/" .env
+            sed -i "s/^FE_NEW_TAG=.*/FE_NEW_TAG=1.${{ github.run_number }}/" .env
+
+            # FE 도커 이미지 풀 및 서비스 재시작
+            docker compose pull 
+            docker compose up -d
+
+            # 헬스 체크
+            echo "Waiting for FE server to start..."
+            sleep 10
+            
+            if ! curl -sSf http://localhost:3000/health > /dev/null; then
+              echo "FE Health Check Failed! Initiating Rollback..."
+              # 롤백: 이전 태그로 복구 후 재실행
+              sed -i "s/^FE_NEW_TAG=.*/FE_NEW_TAG=$CURRENT_TAG/" .env
+              docker compose up -d frontend
+              echo "FE Rollback completed."
+              exit 1
+            fi
+            echo "FE Health Check Passed!"
+
+            # 오래된 FE 도커 이미지 정리 (최신 2개만 유지)
+            FE_IMAGE="registry.john-personalproject.xyz/web-fe"
+            docker images $FE_IMAGE --format '{{.CreatedAt}}\t{{.ID}}' | sort -r | awk 'NR>2 {print $2}' | xargs -r docker rmi -f
