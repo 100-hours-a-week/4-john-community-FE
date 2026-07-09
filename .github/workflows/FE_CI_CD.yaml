@@ -90,4 +90,4 @@ jobs:
 
             # 오래된 FE 도커 이미지 정리 (최신 2개만 유지)
             FE_IMAGE="registry.john-personalproject.xyz/web-fe"
-            docker images $FE_IMAGE --format '{{.CreatedAt}}\t{{.ID}}' | sort -r | awk 'NR>2 {print $2}' | xargs -r docker rmi -f
+            docker images $FE_IMAGE --format '{{.ID}}' | awk 'NR>2' | xargs -r docker rmi -f
