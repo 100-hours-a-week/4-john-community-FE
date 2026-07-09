@@ -263,7 +263,7 @@ const uploadProfileImage = () => {
                 if (!ok) throw new Error('서버 응답 오류');
                 localStorage.setItem(
                     'profileImageUrl',
-                    data.webpUrl || data.jpgUrl,
+                    data.webpUrl || data.pngUrl,
                 );
             } catch (error) {
                 console.error('업로드 중 오류 발생:', error);
