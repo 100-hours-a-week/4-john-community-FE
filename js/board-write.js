@@ -143,7 +143,7 @@ const changeEventHandler = async (event, uid) => {
         try {
             const { ok, data } = await fileUpload(formData);
             if (!ok) throw new Error('서버 응답 오류');
-            localStorage.setItem('postFileUrl', data.webpUrl || data.jpgUrl);
+            localStorage.setItem('postFileUrl', data.webpUrl || data.pngUrl);
         } catch (error) {
             console.error('업로드 중 오류 발생:', error);
         }

@@ -130,7 +130,7 @@ const changeEventHandler = async (event, uid) => {
                 );
 
                 if (!ok) throw new Error('서버 응답 오류');
-                const profileImageUrl = data.webpUrl || data.jpgUrl;
+                const profileImageUrl = data.webpUrl || data.pngUrl;
                 localStorage.setItem(
                     'profileImageUrl',
                     profileImageUrl,
