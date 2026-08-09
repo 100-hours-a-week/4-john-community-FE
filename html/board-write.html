@@ -40,6 +40,23 @@
                 accept="image/jpeg,image/png"
         />
     </div>
+    <div class="inputBox">
+        <label class="non-border">영상</label>
+        <input
+                class="non-border"
+                type="file"
+                id="video"
+                placeholder="영상 파일을 선택해주세요."
+                accept="video/mp4,video/quicktime,video/x-msvideo,video/x-matroska,video/webm"
+        />
+        <p id="videoPreviewText" style="display:none; padding: 0 16px; font-size: 13px; color: #555;"></p>
+        <div id="videoProgress" style="display:none; padding: 0 16px;">
+            <div style="background: #e0e0e0; border-radius: 4px; height: 8px; overflow: hidden;">
+                <div id="videoProgressBar" style="background: #7F6AEE; height: 100%; width: 0%; transition: width 0.3s;"></div>
+            </div>
+            <p id="videoProgressText" style="font-size: 12px; color: #888; margin-top: 4px;">0%</p>
+        </div>
+    </div>
     <button id="submit">완료</button>
 </div>
 <div class="background"></div>

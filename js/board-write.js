@@ -10,6 +10,7 @@ import {
 import {
     createPost,
     fileUpload,
+    videoUpload,
     updatePost,
     getBoardItem,
 } from '../client-api/board-writeRequest.js';
@@ -30,6 +31,11 @@ const imagePreviewText = document.getElementById('imagePreviewText');
 const contentHelpElement = document.querySelector(
     '.inputBox p[name="content"]',
 );
+const videoInput = document.querySelector('#video');
+const videoPreviewText = document.getElementById('videoPreviewText');
+const videoProgress = document.getElementById('videoProgress');
+const videoProgressBar = document.getElementById('videoProgressBar');
+const videoProgressText = document.getElementById('videoProgressText');
 
 const boardWrite = {
     title: '',
@@ -53,11 +59,13 @@ const observeSignupData = () => {
 // 엘리먼트 값 가져오기 title, body, postImageUrl
 const getBoardData = () => {
     const postImageUrl = localStorage.getItem('postFileUrl');
+    const postVideoUrl = localStorage.getItem('postVideoUrl');
 
     return {
         title: boardWrite.title,
         body: boardWrite.content,
         postImageUrl: postImageUrl === null ? undefined : postImageUrl,
+        postVideoUrl: postVideoUrl === null ? undefined : postVideoUrl,
     };
 };
 
@@ -77,6 +85,7 @@ const addBoard = async () => {
 
         if (status === HTTP_CREATED) {
             localStorage.removeItem('postFileUrl');
+            localStorage.removeItem('postVideoUrl');
             window.location.href = `/html/board.html?id=${data}`;
         } else {
             const helperElement = contentHelpElement;
@@ -94,6 +103,7 @@ const addBoard = async () => {
 
         if (status === HTTP_OK) {
             localStorage.removeItem('postFileUrl');
+            localStorage.removeItem('postVideoUrl');
             window.location.href = `/html/board.html?id=${postId}`;
         } else {
             Dialog('게시글', '게시글 수정 실패');
@@ -150,6 +160,43 @@ const changeEventHandler = async (event, uid) => {
     } else if (uid === 'imagePreviewText') {
         localStorage.removeItem('postFileUrl');
         imagePreviewText.style.display = 'none';
+    } else if (uid === 'video') {
+        const file = event.target.files[0];
+        if (!file) {
+            console.log('영상 파일이 선택되지 않았습니다.');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        // 영상 업로드 프로그레스 UI 표시
+        videoPreviewText.textContent = file.name;
+        videoPreviewText.style.display = 'block';
+        videoProgress.style.display = 'block';
+        videoProgressBar.style.width = '0%';
+        videoProgressText.textContent = '0%';
+
+        try {
+            const { ok, data } = await videoUpload(formData, (percent) => {
+                videoProgressBar.style.width = percent + '%';
+                videoProgressText.textContent = percent + '%';
+            });
+            if (!ok) throw new Error('서버 응답 오류');
+            localStorage.setItem('postVideoUrl', data.videoUrl);
+            videoProgressText.textContent = '업로드 완료!';
+            videoPreviewText.innerHTML = file.name + '<span class="deleteFile">X</span>';
+            videoPreviewText.querySelector('.deleteFile').addEventListener('click', () => {
+                localStorage.removeItem('postVideoUrl');
+                videoPreviewText.style.display = 'none';
+                videoProgress.style.display = 'none';
+                videoInput.value = '';
+            });
+        } catch (error) {
+            console.error('영상 업로드 중 오류 발생:', error);
+            videoProgressText.textContent = '업로드 실패';
+            videoProgressBar.style.background = '#ff4444';
+        }
     }
 
     observeSignupData();
@@ -179,6 +226,9 @@ const addEvent = () => {
     );
     imageInput.addEventListener('change', event =>
         changeEventHandler(event, 'image'),
+    );
+    videoInput.addEventListener('change', event =>
+        changeEventHandler(event, 'video'),
     );
     if (imagePreviewText !== null) {
         imagePreviewText.addEventListener('click', event =>
@@ -216,6 +266,19 @@ const setModifyData = data => {
     } else {
         // 이미지 파일이 없으면 미리보기 숨김
         imagePreviewText.style.display = 'none';
+    }
+
+    const videoUrl = resolveImageUrl(data.postVideo);
+    if (videoUrl) {
+        const videoFileName = videoUrl.split('/').pop();
+        videoPreviewText.innerHTML = videoFileName + '<span class="deleteFile">X</span>';
+        videoPreviewText.style.display = 'block';
+        localStorage.setItem('postVideoUrl', data.postVideo);
+        videoPreviewText.querySelector('.deleteFile').addEventListener('click', () => {
+            localStorage.removeItem('postVideoUrl');
+            videoPreviewText.style.display = 'none';
+            videoInput.value = '';
+        });
     }
 
     boardWrite.title = data.title;

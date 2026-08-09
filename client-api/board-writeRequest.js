@@ -44,3 +44,43 @@ export const getBoardItem = postId => {
 
     return result;
 };
+
+export const videoUpload = (formData, onProgress) => {
+    return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', getServerUrl() + '/videos');
+        xhr.withCredentials = true;
+
+        xhr.upload.addEventListener('progress', (event) => {
+            if (event.lengthComputable && onProgress) {
+                const percent = Math.round((event.loaded / event.total) * 100);
+                onProgress(percent);
+            }
+        });
+
+        xhr.addEventListener('load', () => {
+            try {
+                const body = JSON.parse(xhr.responseText);
+                resolve({
+                    ok: xhr.status >= 200 && xhr.status < 300,
+                    status: xhr.status,
+                    data: body.data || body,
+                    body,
+                });
+            } catch (e) {
+                resolve({
+                    ok: xhr.status >= 200 && xhr.status < 300,
+                    status: xhr.status,
+                    data: null,
+                    body: null,
+                });
+            }
+        });
+
+        xhr.addEventListener('error', () => {
+            reject(new Error('영상 업로드 중 네트워크 오류가 발생했습니다.'));
+        });
+
+        xhr.send(formData);
+    });
+};
