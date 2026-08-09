@@ -65,6 +65,9 @@ jobs:
           script: |
             cd /home/${{ secrets.EC2_FE_USERNAME }}/web-stack
             
+            # EC2 서버 내부에서도 Private Registry 로그인 수행
+            echo "${{ secrets.REGISTRY_PASSWORD }}" | docker login registry.john-personalproject.xyz -u "${{ secrets.REGISTRY_USERNAME }}" --password-stdin
+
             # FE 태그 업데이트 (기존 버전을 OLD로, 새 버전을 NEW로)
             CURRENT_TAG=$(grep "^FE_NEW_TAG=" .env | cut -d '=' -f2)
             sed -i "s/^FE_OLD_TAG=.*/FE_OLD_TAG=$CURRENT_TAG/" .env
