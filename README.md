@@ -26,7 +26,7 @@
 
 ---
 
-## 🏗️ 영상 업로드 & 스트리밍 아키텍처 (Video Upload Architecture)
+## 영상 업로드 & 스트리밍 아키텍처 (Video Upload Architecture)
 
 ```mermaid
 sequenceDiagram
