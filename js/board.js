@@ -99,6 +99,20 @@ const setBoardDetail = data => {
     const contentElement = document.querySelector('.content');
     contentElement.textContent = data.body;
 
+    // 영상 표시
+    const contentVideoElement = document.querySelector('.contentVideo');
+    contentVideoElement.innerHTML = '';
+    if (data.postVideoUrl) {
+        const video = document.createElement('video');
+        video.src = resolveImageUrl(data.postVideoUrl);
+        video.controls = true;
+        video.style.display = 'block';
+        video.style.maxWidth = '100%';
+        video.style.marginBottom = '10px';
+        video.style.borderRadius = '8px';
+        contentVideoElement.appendChild(video);
+    }
+
     const likeButtonElement = document.querySelector('.likeButton');
     const likeCountElement = likeButtonElement.querySelector('h3');
     let isLiked = Boolean(data.isLiked);
