@@ -2,7 +2,7 @@
 
 ## Front-end 소개
 - 팟캐스트를 스트리밍하면서 커뮤니티 이용자들끼리 자유롭게 토론하고 대화하는 커뮤니티 프로젝트입니다.
-- AWS 서버리스 영상 인코딩(MediaConvert) 파이프라인 및 Presigned URL direct upload가 적용된 웹 커뮤니티 프론트엔드 서비스
+- AWS 서버리스 영상 인코딩(MediaConvert) 파이프라인 및 Presigned URL upload가 적용된 웹 커뮤니티 프론트엔드 서비스입니다
 
 ### Back end
 - <a href="https://github.com/minjae196/ktb_community_practice">Back-end Github</a>
