@@ -11,6 +11,8 @@ import {
     createPost,
     fileUpload,
     videoUpload,
+    getPresignedVideoUrl,
+    uploadVideoToS3Presigned,
     updatePost,
     getBoardItem,
 } from '../client-api/board-writeRequest.js';
@@ -167,9 +169,6 @@ const changeEventHandler = async (event, uid) => {
             return;
         }
 
-        const formData = new FormData();
-        formData.append('file', file);
-
         // 영상 업로드 프로그레스 UI 표시
         videoPreviewText.textContent = file.name;
         videoPreviewText.style.display = 'block';
@@ -178,11 +177,19 @@ const changeEventHandler = async (event, uid) => {
         videoProgressText.textContent = '0%';
 
         try {
-            const { ok, data } = await videoUpload(formData, (percent) => {
+            // 1. 백엔드에 Presigned URL 요청 (서버 부담 0%)
+            const extension = file.name.includes('.') ? file.name.substring(file.name.lastIndexOf('.')) : '.mp4';
+            const { ok, data } = await getPresignedVideoUrl(extension);
+            if (!ok || !data || !data.presignedUrl) throw new Error('Presigned URL 발급 실패');
+
+            // 2. 브라우저에서 S3로 직접 PUT 업로드 (진행률 표시)
+            const s3Result = await uploadVideoToS3Presigned(data.presignedUrl, file, (percent) => {
                 videoProgressBar.style.width = percent + '%';
                 videoProgressText.textContent = percent + '%';
             });
-            if (!ok) throw new Error('서버 응답 오류');
+
+            if (!s3Result.ok) throw new Error('S3 직통 업로드 실패');
+
             localStorage.setItem('postVideoUrl', data.videoUrl);
             videoProgressText.textContent = '업로드 완료!';
             videoPreviewText.innerHTML = file.name + '<span class="deleteFile">X</span>';

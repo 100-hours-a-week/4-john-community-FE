@@ -84,3 +84,41 @@ export const videoUpload = (formData, onProgress) => {
         xhr.send(formData);
     });
 };
+
+export const getPresignedVideoUrl = extension => {
+    return requestJson(`${getServerUrl()}/videos/presigned-url?extension=${encodeURIComponent(extension)}`, {
+        method: 'GET',
+        credentials: 'include',
+    });
+};
+
+export const uploadVideoToS3Presigned = (presignedUrl, file, onProgress) => {
+    return new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open('PUT', presignedUrl);
+        if (file.type) {
+            xhr.setRequestHeader('Content-Type', file.type);
+        }
+
+        xhr.upload.addEventListener('progress', event => {
+            if (event.lengthComputable && onProgress) {
+                const percent = Math.round((event.loaded / event.total) * 100);
+                onProgress(percent);
+            }
+        });
+
+        xhr.addEventListener('load', () => {
+            if (xhr.status >= 200 && xhr.status < 300) {
+                resolve({ ok: true, status: xhr.status });
+            } else {
+                resolve({ ok: false, status: xhr.status });
+            }
+        });
+
+        xhr.addEventListener('error', () => {
+            reject(new Error('S3 직통 영상 업로드 중 네트워크 오류가 발생했습니다.'));
+        });
+
+        xhr.send(file);
+    });
+};
