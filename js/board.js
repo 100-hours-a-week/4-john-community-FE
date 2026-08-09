@@ -99,17 +99,28 @@ const setBoardDetail = data => {
     const contentElement = document.querySelector('.content');
     contentElement.textContent = data.body;
 
-    // 영상 표시
+    // 영상 표시 (HLS 및 일반 MP4 모두 호환)
     const contentVideoElement = document.querySelector('.contentVideo');
     contentVideoElement.innerHTML = '';
     if (data.postVideoUrl) {
         const video = document.createElement('video');
-        video.src = resolveImageUrl(data.postVideoUrl);
+        const videoSrc = resolveImageUrl(data.postVideoUrl);
         video.controls = true;
         video.style.display = 'block';
         video.style.maxWidth = '100%';
         video.style.marginBottom = '10px';
         video.style.borderRadius = '8px';
+
+        if (videoSrc.endsWith('.m3u8') && window.Hls && Hls.isSupported()) {
+            const hls = new Hls();
+            hls.loadSource(videoSrc);
+            hls.attachMedia(video);
+        } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+            // Safari 등 네이티브 HLS 지원 브라우저
+            video.src = videoSrc;
+        } else {
+            video.src = videoSrc;
+        }
         contentVideoElement.appendChild(video);
     }
 
