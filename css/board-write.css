@@ -84,7 +84,8 @@ h2 {
 .deleteFile {
     cursor: pointer;
     padding-left: 10px;
-    color: red;
+    color: #2e7d32;
+    font-weight: bold;
 }
 
 .helperText {
