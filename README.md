@@ -13,7 +13,7 @@
 ## 주요 특징 (Key Features)
 
 - **Presigned URL 기반 S3 영상 업로드**
-  - 백엔드 서버 부하(0%) 없이 브라우저에서 AWS S3 Raw 버킷으로 직접 초고속 업로드 (`PUT`)
+  - 백엔드 서버 부하없이 브라우저에서 AWS S3 Raw 버킷으로 직접 업로드
   - `XMLHttpRequest` 기반 실시간 프로그레스 바 (0% ~ 100%) 제공
 - **HLS (.m3u8) 동영상 스트리밍 재생**
   - AWS Elemental MediaConvert로 자동 변환된 HLS 멀티 비트레이트 동영상 스트리밍
